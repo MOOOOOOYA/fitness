@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>训练计划 · Month 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0a0a0c;
+    --bg2: #111114;
+    --bg3: #18181d;
+    --bg4: #1f1f26;
+    --border: #2a2a35;
+    --border2: #3a3a48;
+    --accent: #7b6fff;
+    --accent2: #5b4fff;
+    --accent-glow: rgba(123,111,255,0.15);
+    --green: #3ddc84;
+    --green-dim: rgba(61,220,132,0.12);
+    --red: #ff6b6b;
+    --orange: #ff9a3c;
+    --yellow: #ffd166;
+    --text: #e8e8f0;
+    --text2: #9090a8;
+    --text3: #5a5a70;
+    --card-r: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(180deg, #12121a 0%, var(--bg) 100%);
+    padding: 20px 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo span { color: var(--accent); }
+
+  .week-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+
+  .week-selector select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    padding-right: 4px;
+  }
+
+  .week-selector select option { background: #1a1a22; }
+
+  .week-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* DAY TABS */
+  .day-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0;
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+
+  .day-tab {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 12px 12px;
+    cursor: pointer;
+    position: relative;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    min-width: 44px;
+  }
+
+  .day-tab.active { border-bottom-color: var(--accent); }
+  .day-tab.active .day-name { color: var(--accent); }
+  .day-tab.active .day-num { color: var(--text); }
+  .day-tab.rest-day .day-num { color: var(--text3); }
+  .day-tab.rest-day .day-name { color: var(--text3); }
+  .day-tab.today .day-num-wrap { position: relative; }
+  .day-tab.today .day-num-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .day-name {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .day-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text2);
+  }
+
+  .day-done-dot {
+    width: 5px; height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-top: 3px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .day-done-dot.show { opacity: 1; }
+
+  /* CONTENT */
+  .content {
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* DAY HEADER */
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .day-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .day-subtitle {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .day-badge {
+    background: var(--accent-glow);
+    border: 1px solid rgba(123,111,255,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'Syne', sans-serif;
+    white-space: nowrap;
+  }
+
+  .day-badge.rest { background: rgba(90,90,112,0.15); border-color: var(--border); color: var(--text3); }
+
+  /* PROGRESS BAR */
+  .progress-section {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; }
+  .progress-count { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 4px;
+    background: var(--bg4);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-icon.food { background: rgba(255,154,60,0.15); }
+  .section-icon.warmup { background: rgba(255,100,100,0.12); }
+  .section-icon.train { background: rgba(123,111,255,0.15); }
+  .section-icon.stretch { background: rgba(61,220,132,0.12); }
+  .section-icon.survey { background: rgba(255,209,102,0.12); }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .section-meta {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 300;
+  }
+
+  .section-chevron {
+    color: var(--text3);
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .section-chevron.open { transform: rotate(180deg); }
+
+  .section-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .section-body.open { display: block; }
+
+  /* MEAL CARD */
+  .meal-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .meal-item:last-child { border-bottom: none; }
+
+  .meal-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .meal-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 6px;
+    font-weight: 300;
+  }
+
+  .meal-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .meal-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  .meal-tag.kcal { background: rgba(255,209,102,0.12); color: var(--yellow); border: 1px solid rgba(255,209,102,0.2); }
+  .meal-tag.protein { background: rgba(123,111,255,0.1); color: var(--accent); border: 1px solid rgba(123,111,255,0.2); }
+  .meal-tag.price { background: rgba(61,220,132,0.08); color: var(--green); border: 1px solid rgba(61,220,132,0.15); }
+
+  /* WARMUP ITEMS */
+  .warmup-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .warmup-item:last-child { border-bottom: none; }
+
+  .warmup-dot {
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+
+  .warmup-text { font-size: 13px; color: var(--text2); flex: 1; line-height: 1.4; }
+  .warmup-time { font-size: 11px; color: var(--text3); flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 600; }
+
+  /* EXERCISE ITEMS */
+  .exercise-item {
+    border-bottom: 1px solid var(--border);
+  }
+  .exercise-item:last-child { border-bottom: none; }
+
+  .exercise-main {
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .exercise-checkbox {
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--border2);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+    cursor: pointer;
+  }
+
+  .exercise-checkbox.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .exercise-checkbox .check-icon {
+    opacity: 0;
+    font-size: 12px;
+    transition: opacity 0.2s;
+  }
+  .exercise-checkbox.checked .check-icon { opacity: 1; }
+
+  .exercise-info { flex: 1; }
+
+  .exercise-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .exercise-sets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .exercise-set-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .exercise-set-tag.sets { background: rgba(123,111,255,0.12); color: var(--accent); }
+  .exercise-set-tag.reps { background: rgba(255,154,60,0.1); color: var(--orange); }
+  .exercise-set-tag.rest { background: var(--bg4); color: var(--text3); }
+  .exercise-set-tag.muscle { background: rgba(61,220,132,0.08); color: var(--green); }
+
+  .exercise-expand-btn {
+    font-size: 10px;
+    color: var(--text3);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 6px;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+
+  .exercise-chevron {
+    color: var(--text3);
+    font-size: 11px;
+    margin-top: 3px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .exercise-chevron.open { transform: rotate(180deg); }
+
+  .exercise-detail {
+    display: none;
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+  .exercise-detail.open { display: block; }
+
+  .detail-block {
+    margin-bottom: 10px;
+  }
+  .detail-block:last-child { margin-bottom: 0; }
+
+  .detail-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .detail-label.feel { color: var(--accent); }
+  .detail-label.how { color: var(--green); }
+  .detail-label.wrong { color: var(--red); }
+  .detail-label.weight { color: var(--yellow); }
+
+  .detail-text {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .detail-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .detail-list li {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    padding: 2px 0;
+    padding-left: 12px;
+    position: relative;
+    font-weight: 300;
+  }
+
+  .detail-list li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--text3);
+  }
+
+  /* STRETCH */
+  .stretch-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stretch-item:last-child { border-bottom: none; }
+
+  .stretch-dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.8;
+  }
+
+  .stretch-text { font-size: 13px; color: var(--text2); flex: 1; line-height: 1.4; }
+  .stretch-time { font-size: 11px; color: var(--text3); flex-shrink: 0; font-family: 'Syne', sans-serif; font-weight: 600; }
+
+  /* SURVEY */
+  .survey-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .survey-item:last-child { border-bottom: none; }
+
+  .survey-q {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 10px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .survey-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .survey-opt {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  .survey-opt:active { transform: scale(0.97); }
+  .survey-opt.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+  .survey-text-input {
+    width: 100%;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 12px;
+    resize: none;
+    outline: none;
+    margin-top: 8px;
+    min-height: 60px;
+    transition: border-color 0.2s;
+  }
+
+  .survey-text-input:focus { border-color: var(--accent); }
+  .survey-text-input::placeholder { color: var(--text3); }
+
+  /* REST DAY */
+  .rest-content {
+    padding: 16px;
+  }
+
+  .rest-hero {
+    text-align: center;
+    padding: 24px 0 20px;
+  }
+
+  .rest-emoji { font-size: 40px; margin-bottom: 12px; }
+
+  .rest-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .rest-desc { font-size: 13px; color: var(--text2); line-height: 1.6; font-weight: 300; }
+
+  .rest-tips {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .rest-tip-head {
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+
+  .rest-tip-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .rest-tip-item:last-child { border-bottom: none; }
+  .rest-tip-icon { font-size: 16px; flex-shrink: 0; }
+  .rest-tip-text { font-size: 13px; color: var(--text2); line-height: 1.5; font-weight: 300; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(61,220,132,0.15), rgba(123,111,255,0.1));
+    border: 1px solid rgba(61,220,132,0.3);
+    border-radius: var(--card-r);
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+    animation: bannerIn 0.4s ease;
+  }
+
+  @keyframes bannerIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .completion-banner.show { display: block; }
+
+  .completion-emoji { font-size: 32px; margin-bottom: 8px; }
+  .completion-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .completion-sub { font-size: 12px; color: var(--text2); font-weight: 300; }
+
+  /* EXPORT BUTTON */
+  .export-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    color: var(--text2);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    transition: all 0.2s;
+  }
+  .export-btn:active { background: var(--bg4); transform: scale(0.99); }
+  .export-btn .export-icon { font-size: 16px; }
+
+  /* KCAL INFO */
+  .daily-kcal {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .daily-kcal-label { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; }
+
+  .daily-kcal-nums {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .daily-kcal-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .kcal-in { color: var(--yellow); }
+  .kcal-burn { color: var(--accent); }
+  .kcal-sep { color: var(--text3); font-size: 10px; }
+
+  /* SMOOTH */
+  * { -webkit-font-smoothing: antialiased; }
+
+  .section-card { transition: box-shadow 0.2s; }
+  .section-card:active { box-shadow: 0 0 0 1px var(--border2); }
+
+  /* Scroll padding for sticky header */
+  html { scroll-padding-top: 140px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">BODY<span>01</span></div>
+    <div class="week-selector">
+      <div class="week-dot"></div>
+      <select id="weekSelect" onchange="changeWeek(this.value)">
+        <option value="1">第 1 周</option>
+        <option value="2">第 2 周</option>
+        <option value="3">第 3 周</option>
+        <option value="4">第 4 周</option>
+      </select>
+      <span style="color:var(--text3);font-size:12px;">▾</span>
+    </div>
+  </div>
+  <div class="day-tabs" id="dayTabs"></div>
+</div>
+
+<div class="content" id="mainContent"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const PLAN = {
+  // 周一：推 - 胸+肩+三头
+  1: {
+    title: "推力日",
+    subtitle: "胸 · 肩 · 三头",
+    badge: "A 训练",
+    kcal_burn: 280,
+    kcal_total: 1800,
+    warmup: [
+      { text: "手臂绕环：向前+向后各15圈，激活肩关节", time: "1min" },
+      { text: "猫牛式：脊柱热身，关注胸口展开", time: "1min" },
+      { text: "跪姿俯卧撑 × 10次：激活胸肌和肩部", time: "1min" },
+      { text: "弹力带侧平举 × 15次（轻）：激活三角肌中束", time: "1min" },
+      { text: "胸椎旋转拉伸：坐姿，双手抱头，左右各8次", time: "1min" }
+    ],
+    exercises: [
+      {
+        id: "incline_db_press",
+        name: "上斜哑铃卧推",
+        sets: "3", reps: "10–12", rest: "90s", muscle: "上胸 · 肩前束",
+        feel: "胸口上方（锁骨附近）和肩膀正前方有明显被拉伸和收缩感，不是肩膀顶部酸",
+        how: [
+          "调椅背约30–45°，背部贴靠，腰部自然弓起不要悬空",
+          "哑铃落在乳头线上方约5cm处，肘部夹角约75°（不要完全打开90°）",
+          "推起时哑铃轨迹略往内收，顶端不完全锁死，留有张力",
+          "下放时感受上胸被拉开，控制速度2秒下降"
+        ],
+        wrong: [
+          "耸肩：肩膀跑到耳朵边→下压肩胛骨再推",
+          "手腕折叠：腕关节要中立，哑铃握在掌心下方",
+          "重量太重导致上肢抖动→宁可轻，先学轨迹"
+        ],
+        weight: "从最轻的哑铃开始（通常健身房有2.5kg起），能做满12次且最后两次稍费力就合适。初始建议5–7.5kg每只手"
+      },
+      {
+        id: "db_lateral_raise",
+        name: "哑铃侧平举（坐姿）",
+        sets: "4", reps: "12–15", rest: "60s", muscle: "三角肌中束（肩头宽度关键）",
+        feel: "肩膀最外侧（中间那块肉）有烧灼感，感觉肩头在发力，不是脖子",
+        how: [
+          "坐在凳子边缘，身体微微前倾10°，这样三角肌中束发力更纯粹",
+          "哑铃从体侧出发，肘部微弯并固定，像倒水一样向两侧抬起",
+          "小指端略高于拇指端（倒水姿势），避免肩峰撞击",
+          "举到肩高即停，不要超头顶，顶端停1秒，缓慢放下"
+        ],
+        wrong: [
+          "借惯性耸肩甩臂→这是斜方肌在代偿，要放慢动作",
+          "肘部打直→要保持微弯，否则关节受力",
+          "重量太重→侧平举3–5kg足够，感受比重量重要"
+        ],
+        weight: "初始3–4kg，全程控制不借力。这个动作宁可极轻也要做标准，否则全是斜方肌练习"
+      },
+      {
+        id: "db_shoulder_press",
+        name: "哑铃肩推（坐姿）",
+        sets: "3", reps: "10–12", rest: "90s", muscle: "三角肌前束+中束 · 综合肩部",
+        feel: "整个肩膀深处发力感，推起时感觉肩头变圆",
+        how: [
+          "坐姿，靠背垂直，背部贴紧椅背，避免腰部过度代偿",
+          "哑铃起始位置在耳朵旁边，肘部约90°，掌心向前",
+          "向正上方推起，顶端哑铃略内收但不相碰，留有张力不锁死",
+          "下放时肘部到略低于肩膀即可，避免肩关节过度拉伸"
+        ],
+        wrong: [
+          "腰部拱起借力→全程背部贴靠",
+          "耸肩：肩膀跑上来→主动压住肩胛骨",
+          "落点太低拉伤肩袖→肘部下方不超过肩线"
+        ],
+        weight: "比侧平举重，初始7.5–10kg每只手，能做10次且动作稳定为准"
+      },
+      {
+        id: "pushup",
+        name: "标准俯卧撑",
+        sets: "3", reps: "8–15（根据能力）", rest: "60s", muscle: "胸肌 · 三头肌 · 肩前束（全推力链条）",
+        feel: "胸口正中间和腋窝连线区域有拉伸，下去时更明显",
+        how: [
+          "双手略宽于肩，手指朝前微微外展",
+          "身体从头到脚跟呈一条直线，核心收紧，臀部不要翘起",
+          "下去时胸口几乎触地（不超过拳头高度），控制2秒",
+          "推起不要完全锁肘，留有张力"
+        ],
+        wrong: [
+          "塌腰：核心没有激活→想象肚脐朝脊柱方向收",
+          "撅屁股：降低难度可以跪姿但保持身体直线",
+          "头低下去先触地→颈部中立，眼睛看斜前方地面"
+        ],
+        weight: "自重即可。做不满8次可改跪姿，做满15次可脚搭椅子提高难度"
+      }
+    ],
+    stretch: [
+      { text: "胸肌拉伸：门框撑开，单臂靠门，身体前倾，感受胸口被打开，左右各30秒", time: "60s" },
+      { text: "肩前束拉伸：双手在背后十指交扣，挺胸抬头向上展开，保持30秒", time: "30s" },
+      { text: "斜方肌放松：头向一侧倾，对侧手轻压，拉伸颈侧，左右各20秒", time: "40s" },
+      { text: "三头肌拉伸：手臂举过头顶，肘弯曲向背部，另一手辅助，左右各20秒", time: "40s" },
+      { text: "胸椎泡沫轴滚动（若有）：放在上背部，前后滚动1分钟放松", time: "60s" }
+    ],
+    survey: [
+      { id: "s1_pump", q: "训练后肩膀有没有充血感（泵感）？", opts: ["完全没有", "轻微有", "明显有", "非常强烈"] },
+      { id: "s1_trap", q: "侧平举时有没有感到脖子或斜方肌很累？", opts: ["没有", "轻微", "明显累", "比肩更累"] },
+      { id: "s1_weight", q: "今天的重量选择感觉如何？", opts: ["太轻了", "刚好合适", "有点重", "太重了"] },
+      { id: "s1_energy", q: "训练整体精力状态？", opts: ["很差", "一般", "不错", "很好"], text: true }
+    ],
+    meals: {
+      breakfast: {
+        name: "早餐（10点前）",
+        desc: "轻食店：无糖豆浆 + 全麦三明治（鸡胸肉/鸡蛋/蔬菜），避免甜酱",
+        kcal: 480, protein: "28g", price: "约13–16元"
+      },
+      lunch: {
+        name: "午餐（训练后1小时内）",
+        desc: "轻食店：鸡胸肉饭碗（鸡胸100g + 杂粮饭150g + 炒蔬菜），告诉店家少油少盐",
+        kcal: 620, protein: "38g", price: "约14–16元"
+      },
+      dinner: {
+        name: "晚餐",
+        desc: "轻食店：鸡蛋杂蔬沙拉（2个鸡蛋 + 大量蔬菜 + 少量杂粮/玉米），油醋汁或无糖芥末酱",
+        kcal: 420, protein: "22g", price: "约12–15元"
+      }
+    }
+  },
+
+  // 周二：拉 - 背+肱二
+  2: {
+    title: "拉力日",
+    subtitle: "背 · 肱二头肌",
+    badge: "B 训练",
+    kcal_burn: 260,
+    kcal_total: 1750,
+    warmup: [
+      { text: "肩胛骨收缩练习：坐姿，手臂自然垂下，主动把肩胛骨往中间夹，重复15次", time: "1min" },
+      { text: "弹力带/哑铃轻量直臂下压：感受背阔肌激活，15次", time: "1min" },
+      { text: "猫式伸展：跪四足，拱背展背各10次", time: "1min" },
+      { text: "悬挂放松（若有单杠）：正握悬挂20秒，让脊柱自然放松", time: "30s" },
+      { text: "颈部缓慢旋转：前后左右各2圈，轻柔不用力", time: "1min" }
+    ],
+    exercises: [
+      {
+        id: "lat_pulldown",
+        name: "坐姿高位下拉",
+        sets: "4", reps: "10–12", rest: "90s", muscle: "背阔肌（打造V形背 · 让腰显细）",
+        feel: "腋窝到腰侧这段肌肉被拉伸和挤压，不是肩膀顶部用力",
+        how: [
+          "握距略宽于肩，正握（掌心朝前）或中立握（掌心相对）均可",
+          "身体微微后倾10°，挺胸，肩胛骨主动下压（最关键！）",
+          "把杠往胸口上方下拉，想象肘部插入口袋，而非手往下拽",
+          "顶点时肩胛骨充分收缩，停1秒，缓慢放回不要放到完全伸直"
+        ],
+        wrong: [
+          "耸肩借力：做动作之前先深呼吸沉肩→这是最常见错误",
+          "手臂先弯曲拉→要先用背部肌肉发力，手只是钩子",
+          "重量太重导致身体剧烈摇摆→减重，感受背部发力"
+        ],
+        weight: "以能控制且背阔肌有感为准，通常从30–40kg配重开始，不强求重量"
+      },
+      {
+        id: "seated_row",
+        name: "坐姿绳索划船",
+        sets: "3", reps: "10–12", rest: "90s", muscle: "菱形肌 · 中斜方肌（改善背部厚度，但注意控制）",
+        feel: "背部中间（两肩胛骨之间）强烈挤压感，不是腰部用力",
+        how: [
+          "坐直，脚踩踏板，膝盖微弯，上身挺直（不要塌背）",
+          "把手柄拉向下腹/肚脐位置，肘部贴紧身体两侧",
+          "拉到底时挤压肩胛骨，停1秒感受背部充分收缩",
+          "放回时手臂完全伸直但背部不要随之弓起，全程保持胸口挺起"
+        ],
+        wrong: [
+          "用腰部前后摇摆借力→幅度应该只有手臂",
+          "肩膀跑上来→主动压住",
+          "放回太快→离心阶段控制2秒，离心训练同样重要"
+        ],
+        weight: "初始建议20–30kg，以感受到背部中间有挤压感为准"
+      },
+      {
+        id: "db_curl",
+        name: "哑铃弯举（站姿交替）",
+        sets: "3", reps: "每臂10–12次", rest: "60s", muscle: "肱二头肌（手臂线条）",
+        feel: "肘关节到肩膀前方这段肌肉明显收缩，顶端有充血感",
+        how: [
+          "站姿，手臂自然垂下，掌心朝前，哑铃握在手心中央",
+          "单臂弯曲，肘部保持固定不向前移，只有前臂在运动",
+          "顶端哑铃旋转（旋后）使小指朝上，充分收缩，停1秒",
+          "缓慢放下，控制2秒，完全伸直再开始另一侧"
+        ],
+        wrong: [
+          "肘部前移借力：肘部要像钉在腰侧一样固定",
+          "身体后仰借力→核心收紧，不要靠摆动",
+          "不做旋后→旋后才能充分激活肱二头肌短头"
+        ],
+        weight: "初始7.5–10kg，以能感受到二头肌充分收缩为准"
+      },
+      {
+        id: "face_pull",
+        name: "绳索面拉（Face Pull）",
+        sets: "3", reps: "15次", rest: "60s", muscle: "肩袖 · 后三角肌（预防溜肩 · 平衡推拉）",
+        feel: "肩膀后侧和中间背部，不是颈部",
+        how: [
+          "绳索设置在头部高度，双手握绳端（分叉绳），正握",
+          "站姿或跪姿，身体稳定，把绳往脸部方向拉",
+          "肘部向两侧打开，高于肩膀，拉到面部时两手分开",
+          "全程肩胛骨保持收缩，不要耸肩"
+        ],
+        wrong: [
+          "重量过重→这个动作要用轻重量，关注后肩感受",
+          "肘部往下掉→肘要高，像在比耶的姿势",
+          "身体后仰→全程站稳或单膝跪地"
+        ],
+        weight: "极轻，5–10kg绳索即可。这个动作是修复性动作，不追求重量"
+      }
+    ],
+    stretch: [
+      { text: "背阔肌拉伸：单臂抓门框/柱子，身体向反方向扭转下沉，左右各30秒", time: "60s" },
+      { text: "菱形肌拉伸：双臂抱肩交叉，下巴低头，感受上背被撑开，30秒", time: "30s" },
+      { text: "肱二头肌拉伸：手臂向后伸直，掌心朝上，另一手辅助轻压，左右各20秒", time: "40s" },
+      { text: "胸椎伸展：坐椅子边缘，双手放头后，背部靠椅背向后弯，充分展胸10次", time: "30s" },
+      { text: "颈部侧拉：头倾向一侧，手搭同侧头部轻压，感受对侧颈肩拉伸，左右各20秒", time: "40s" }
+    ],
+    survey: [
+      { id: "s2_lat", q: "做高位下拉时背阔肌有没有发力感（腋窝下方那块）？", opts: ["没感觉", "轻微", "明显", "很强烈"] },
+      { id: "s2_trap", q: "做划船时有没有明显感到上斜方肌（脖子根部）参与？", opts: ["没有", "轻微", "比较明显", "非常明显"] },
+      { id: "s2_pump", q: "训练后背部有充血感吗？", opts: ["没有", "一点点", "明显", "非常强"] },
+      { id: "s2_note", q: "今天训练有什么特别的感受或问题？", opts: [], text: true }
+    ],
+    meals: {
+      breakfast: {
+        name: "早餐",
+        desc: "轻食店：燕麦粥（无糖） + 水煮蛋2个 + 一小份蔬菜",
+        kcal: 450, protein: "22g", price: "约10–13元"
+      },
+      lunch: {
+        name: "午餐（训练后）",
+        desc: "轻食店：鸡胸肉藜麦碗或杂粮鸡胸饭，多加蔬菜，少油少盐",
+        kcal: 600, protein: "36g", price: "约14–16元"
+      },
+      dinner: {
+        name: "晚餐",
+        desc: "轻食店：豆腐蔬菜沙拉 + 半碗杂粮饭，或鸡蛋炒蔬菜套餐",
+        kcal: 480, protein: "24g", price: "约12–15元"
+      }
+    }
+  },
+
+  // 周三：腿+核心+肋骨外翻修正
+  3: {
+    title: "腿部+核心日",
+    subtitle: "腿 · 核心 · 肋骨修正",
+    badge: "C 训练",
+    kcal_burn: 320,
+    kcal_total: 1850,
+    warmup: [
+      { text: "原地高抬腿 × 30步：激活腿部和心率", time: "1min" },
+      { text: "深蹲热身（自重） × 15次：慢速感受髋关节和膝关节轨迹", time: "1min" },
+      { text: "髋屈肌拉伸：弓步姿势，前膝90°，重心前移拉伸后腿髋前侧，左右各20秒", time: "40s" },
+      { text: "臀桥 × 15次：激活臀肌，避免深蹲时膝盖内扣", time: "1min" },
+      { text: "脚踝绕环：每侧各10圈，提高踝关节灵活性", time: "1min" }
+    ],
+    exercises: [
+      {
+        id: "goblet_squat",
+        name: "高脚杯深蹲（哑铃）",
+        sets: "4", reps: "12次", rest: "90s", muscle: "股四头肌 · 臀大肌 · 核心",
+        feel: "大腿前侧和臀部同时发力，核心保持稳定，不是膝盖和腰部",
+        how: [
+          "双手竖向捧一只哑铃于胸前，双脚略宽于肩，脚尖外开15–30°",
+          "蹲下时保持挺胸，身体不过度前倾，膝盖沿着脚尖方向推开",
+          "蹲到大腿与地面平行（或更低），不要因为太深导致骨盆后倾（屁股眨眼）",
+          "起身时驱动力来自臀部和大腿，而非腰部往后仰"
+        ],
+        wrong: [
+          "膝盖内扣→臀肌激活不足，有意识让膝盖往外推",
+          "脚跟离地→若柔韧性不足，可在脚跟垫小重量板",
+          "低头驼背→视线保持平视或略偏上"
+        ],
+        weight: "自重开始，熟练后可捧10–15kg哑铃"
+      },
+      {
+        id: "rib_fix",
+        name: "死虫式（肋骨外翻修正）",
+        sets: "3", reps: "每侧8次", rest: "60s", muscle: "腹横肌 · 膈肌（修复肋骨外翻核心）",
+        feel: "腹部深层被激活，肋骨下缘感觉被往内往下拉，不是表面腹肌发力",
+        how: [
+          "仰卧，双臂向上伸直，双腿抬起屈膝90°（像桌子面）",
+          "呼气时，腰部主动贴紧地板（不留空隙），这个动作本身就在纠正肋骨",
+          "保持腰贴地，一侧手臂往头顶延伸，对侧腿往前下方伸直（悬空不着地）",
+          "吸气回位，换另一侧。全程腰部始终贴地，若腰起来就停下重置"
+        ],
+        wrong: [
+          "腰部离地：这说明核心不够稳定，先缩小动作范围",
+          "憋气：呼气时腹横肌才充分激活，配合呼吸最关键",
+          "动太快：每次伸展4秒，回位2秒，慢速才有矫正效果"
+        ],
+        weight: "纯自重。不要加重量，这是功能性修复动作"
+      },
+      {
+        id: "hip_hinge",
+        name: "罗马尼亚硬拉（哑铃）",
+        sets: "3", reps: "12次", rest: "90s", muscle: "腘绳肌 · 臀大肌 · 竖脊肌",
+        feel: "大腿后侧和臀部下方明显拉伸感，背部感觉紧绷挺直，不是腰部疼痛",
+        how: [
+          "双手各持哑铃，站立，膝盖微弯并固定（不要蹲下）",
+          "髋关节向后推，上身随之前倾，哑铃沿大腿前侧往下滑",
+          "下放到感受到腘绳肌明显拉伸（通常到小腿中段），不必强求触地",
+          "臀部主动发力将髋关节推回起始位置，起身时不要靠腰部后仰"
+        ],
+        wrong: [
+          "弯腰拱背→核心收紧，背部始终保持中立位",
+          "膝盖弯曲太多变成深蹲→这是髋主导动作，不是腿主导",
+          "重量过重导致无法控制→这个动作技术要求高，宁可轻"
+        ],
+        weight: "初始10–12.5kg每手，以能感受到腘绳肌拉伸为准"
+      },
+      {
+        id: "plank",
+        name: "平板支撑 + 腹式呼吸",
+        sets: "3", reps: "30–45秒", rest: "45s", muscle: "核心稳定 · 肋骨外翻修正辅助",
+        feel: "腹部深层整体参与，不是腰部疼痛，背部感觉一条直线",
+        how: [
+          "前臂撑地，肘部在肩膀正下方，脚尖踩地",
+          "全身一条直线：不塌腰不撅屁股，收下巴（不要低头）",
+          "关键：吸气时腹部往地板方向轻轻下沉感，呼气时腹部往脊柱方向收缩",
+          "这种腹式呼吸配合平板，帮助激活腹横肌压住外翻肋骨"
+        ],
+        wrong: [
+          "塌腰：最常见错误，可在镜子前或请人帮看",
+          "憋气：反而增加腹内压使肋骨外翻加剧，要配合呼吸",
+          "撑太长时间姿势变形→宁可30秒标准也不要90秒变形"
+        ],
+        weight: "自重"
+      }
+    ],
+    stretch: [
+      { text: "股四头肌拉伸：单腿站立，手抓同侧脚踝向后拉，感受大腿前侧拉伸，左右各30秒", time: "60s" },
+      { text: "腘绳肌拉伸：坐地上，双腿伸直，身体前倾（背保持直），保持30秒", time: "30s" },
+      { text: "髋屈肌深度拉伸：低弓步，后膝着地，重心前移，感受髋前侧强烈拉伸，各30秒", time: "60s" },
+      { text: "腹式深呼吸放松：仰卧，膝盖屈起，双手放腹部，做5次深慢腹式呼吸", time: "90s" },
+      { text: "脊柱扭转放松：仰卧，双膝倒向一侧，头转向另一侧，左右各20秒", time: "40s" }
+    ],
+    survey: [
+      { id: "s3_rib", q: "做死虫式时能否感受到腰部始终贴地？", opts: ["做不到", "勉强做到", "大部分能", "完全可以"] },
+      { id: "s3_squat", q: "深蹲时膝盖有没有内扣或疼痛？", opts: ["明显内扣", "轻微内扣", "没有内扣", "有疼痛感"] },
+      { id: "s3_core", q: "平板支撑能坚持多久（标准姿势）？", opts: ["<20秒", "20–30秒", "30–45秒", ">45秒"] },
+      { id: "s3_note", q: "腿部或膝盖有没有不适感？", opts: [], text: true }
+    ],
+    meals: {
+      breakfast: {
+        name: "早餐",
+        desc: "轻食店：全麦吐司 + 鸡蛋2个（水煮/荷包蛋）+ 豆浆无糖",
+        kcal: 500, protein: "26g", price: "约12–15元"
+      },
+      lunch: {
+        name: "午餐（训练后）",
+        desc: "轻食店：高蛋白鸡肉碗（鸡腿肉120g + 糙米/杂粮 + 西兰花/青菜），多加蔬菜",
+        kcal: 650, protein: "40g", price: "约14–17元"
+      },
+      dinner: {
+        name: "晚餐",
+        desc: "轻食店：蔬菜沙拉（鸡蛋 + 豆腐 + 大量蔬菜），少量坚果，不加甜沙拉酱",
+        kcal: 420, protein: "20g", price: "约12–15元"
+      }
+    }
+  },
+
+  // 周四：全身轻训+有氧
+  4: {
+    title: "全身+有氧日",
+    subtitle: "全身轻 · 低强度有氧 · 脸部消脂",
+    badge: "D 训练",
+    kcal_burn: 380,
+    kcal_total: 1700,
+    warmup: [
+      { text: "快走或慢跑5分钟热身：心率提升到轻微出汗", time: "5min" },
+      { text: "全身关节依次活动：颈、肩、腰、髋、膝、踝，各10圈", time: "2min" }
+    ],
+    exercises: [
+      {
+        id: "cardio",
+        name: "中强度有氧（选一种）",
+        sets: "1", reps: "30–35分钟", rest: "—", muscle: "全身脂肪燃烧（含脸部消脂关键）",
+        feel: "心率保持在最大心率的60–70%（220-22=198，目标119–139次/分），能说话但稍喘",
+        how: [
+          "推荐选择：椭圆机 / 划船机 / 快走上坡 / 骑车",
+          "避免跑步（初期体重虽标准但关节保护意识要有）",
+          "划船机最推荐：锻炼背部+消耗热量+不过度刺激斜方肌",
+          "保持稳定节奏，不要忽快忽慢，配合鼻吸嘴呼"
+        ],
+        wrong: [
+          "冲刺高强度→这天目的是有氧供能减脂，不是力竭",
+          "全程低头看手机→会影响姿势和发力效果",
+          "空腹做→训练前1.5小时吃早餐，不要空腹有氧"
+        ],
+        weight: "心率是唯一标准，不看速度和阻力大小"
+      },
+      {
+        id: "circuit",
+        name: "全身轻巡回训练",
+        sets: "2", reps: "每个动作15次循环", rest: "动作间30s，组间2min", muscle: "全身肌肉维持 · 基础代谢提升",
+        feel: "全身轻微出汗，不单独某部位酸，整体活跃感",
+        how: [
+          "①自重深蹲 × 15次",
+          "②俯卧撑 × 10次（可跪姿）",
+          "③弹力带或轻哑铃侧平举 × 15次",
+          "④卷腹 × 15次（不是仰卧起坐，只是肩胛骨离地）",
+          "⑤单腿臀桥 × 每侧12次",
+          "以上5个动作为一组，做2组"
+        ],
+        wrong: [
+          "速度太快→这不是HIIT，保持控制和发力感",
+          "跳过某个动作→全身均衡刺激更有利于代谢"
+        ],
+        weight: "自重为主，侧平举用3kg即可"
+      }
+    ],
+    stretch: [
+      { text: "全身泡沫轴放松（若有）：大腿、背部各滚动1–2分钟", time: "4min" },
+      { text: "全身大拉伸：星形站姿，充分伸展四肢，深呼吸5次", time: "30s" },
+      { text: "坐姿前屈：双腿伸直，脚尖回勾，身体前倾保持30秒", time: "30s" },
+      { text: "仰卧腹式呼吸：做10次深呼吸，每次呼气4秒，帮助副交感神经恢复", time: "2min" }
+    ],
+    survey: [
+      { id: "s4_cardio", q: "有氧时心率大概维持在多少？", opts: ["<110", "110–130", "130–150", ">150"] },
+      { id: "s4_fatigue", q: "这周整体疲劳感如何？", opts: ["没怎么累", "轻微疲劳", "比较疲劳", "非常疲劳"] },
+      { id: "s4_progress", q: "这周相比第一天，训练感受有变化吗？", opts: ["变差了", "差不多", "略有进步", "明显进步"] },
+      { id: "s4_weekly", q: "这周有什么想调整的，或者下周希望改变什么？", opts: [], text: true }
+    ],
+    meals: {
+      breakfast: {
+        name: "早餐（训练前1.5h）",
+        desc: "轻食店：燕麦 + 水煮蛋1个 + 无糖豆浆，量偏少，不要太撑",
+        kcal: 400, protein: "18g", price: "约10–12元"
+      },
+      lunch: {
+        name: "午餐",
+        desc: "轻食店：鸡胸肉蔬菜饭，量正常，是这天补能量的主餐",
+        kcal: 620, protein: "35g", price: "约14–16元"
+      },
+      dinner: {
+        name: "晚餐（稍少）",
+        desc: "轻食店：蔬菜沙拉 + 豆腐，不需要太多碳水，有氧后适量控制",
+        kcal: 380, protein: "18g", price: "约10–13元"
+      }
+    }
+  },
+
+  // 周五到周日：休息日
+  5: { rest: true },
+  6: { rest: true },
+  0: { rest: true }
+};
+
+const REST_TIPS = [
+  { icon: "😴", text: "保持12点前入睡，这是你生长激素分泌高峰期（23:00–2:00），睡眠质量影响肌肉合成效率高达50%" },
+  { icon: "🚶", text: "可以进行轻量活动，如15–20分钟的散步。不需要刻意休息，但避免高强度运动" },
+  { icon: "💧", text: "每天饮水2000ml以上，有助于代谢废物、维持皮肤和面部紧致度" },
+  { icon: "🍳", text: "休息日饮食照常，蛋白质不减，总热量可略低至1500–1600kcal，不要断崖式节食" },
+  { icon: "🧘", text: "可做10分钟深呼吸+腹横肌激活练习：仰卧，腹式呼吸，呼气时腹部内收，辅助肋骨外翻修正" },
+  { icon: "🎵", text: "你是音乐人，情绪管理本身就很重要。压力激素（皮质醇）过高会导致脂肪堆积，尤其是面部和腹部" }
+];
+
+const DAYS = ["日", "一", "二", "三", "四", "五", "六"];
+
+// ============================================================
+// STATE
+// ============================================================
+
+let currentWeek = 1;
+let currentDayIndex = 0;
+
+function getKey(week, dayIndex) { return `w${week}_d${dayIndex}`; }
+
+function loadState(week, dayIndex) {
+  try {
+    const raw = localStorage.getItem(getKey(week, dayIndex));
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveState(week, dayIndex, state) {
+  try {
+    localStorage.setItem(getKey(week, dayIndex), JSON.stringify(state));
+  } catch {}
+}
+
+function getExerciseChecked(week, dayIndex, exId) {
+  return loadState(week, dayIndex)['ex_' + exId] === true;
+}
+
+function setExerciseChecked(week, dayIndex, exId, val) {
+  const s = loadState(week, dayIndex);
+  s['ex_' + exId] = val;
+  saveState(week, dayIndex, s);
+}
+
+function getSurveyAnswer(week, dayIndex, qId) {
+  return loadState(week, dayIndex)['sq_' + qId] || '';
+}
+
+function setSurveyAnswer(week, dayIndex, qId, val) {
+  const s = loadState(week, dayIndex);
+  s['sq_' + qId] = val;
+  saveState(week, dayIndex, s);
+}
+
+// ============================================================
+// BUILD TABS
+// ============================================================
+
+function buildTabs() {
+  const container = document.getElementById('dayTabs');
+  container.innerHTML = '';
+  const today = new Date();
+  const todayDow = today.getDay(); // 0=Sun
+  const todayDate = today.getDate();
+
+  // Show Mon=1 through Sun=0 as Mon Tue Wed Thu Fri Sat Sun
+  const order = [1,2,3,4,5,6,0];
+
+  order.forEach(dow => {
+    const tab = document.createElement('div');
+    const isToday = (dow === todayDow);
+    const isActive = (dow === currentDayIndex);
+    const plan = PLAN[dow];
+    const isRest = !plan || plan.rest;
+
+    tab.className = `day-tab${isActive ? ' active' : ''}${isRest ? ' rest-day' : ''}${isToday ? ' today' : ''}`;
+    tab.innerHTML = `
+      <div class="day-name">${DAYS[dow]}</div>
+      <div class="day-num-wrap"><div class="day-num">${isToday ? todayDate : ''}</div></div>
+      <div class="day-done-dot" id="done-dot-${dow}"></div>
+    `;
+    tab.addEventListener('click', () => {
+      currentDayIndex = dow;
+      buildTabs();
+      buildContent();
+    });
+    container.appendChild(tab);
+  });
+
+  // Update done dots
+  order.forEach(dow => {
+    const plan = PLAN[dow];
+    if (!plan || plan.rest) return;
+    const dot = document.getElementById('done-dot-' + dow);
+    if (!dot) return;
+    const allDone = plan.exercises.every(ex => getExerciseChecked(currentWeek, dow, ex.id));
+    dot.className = 'day-done-dot' + (allDone ? ' show' : '');
+  });
+}
+
+// ============================================================
+// BUILD CONTENT
+// ============================================================
+
+function buildContent() {
+  const container = document.getElementById('mainContent');
+  const plan = PLAN[currentDayIndex];
+
+  if (!plan || plan.rest) {
+    container.innerHTML = buildRestDay();
+    return;
+  }
+
+  const exercises = plan.exercises;
+  const checkedCount = exercises.filter(ex => getExerciseChecked(currentWeek, currentDayIndex, ex.id)).length;
+  const allDone = checkedCount === exercises.length;
+  const progressPct = exercises.length > 0 ? Math.round((checkedCount / exercises.length) * 100) : 0;
+
+  let html = `
+    <div class="day-header">
+      <div>
+        <div class="day-title">${plan.title}</div>
+        <div class="day-subtitle">周${DAYS[currentDayIndex]} · ${plan.subtitle}</div>
+      </div>
+      <div class="day-badge">${plan.badge}</div>
+    </div>
+
+    <div class="daily-kcal">
+      <div class="daily-kcal-label">TODAY</div>
+      <div class="daily-kcal-nums">
+        <span class="daily-kcal-num kcal-in">${plan.kcal_total} kcal摄入</span>
+        <span class="kcal-sep">·</span>
+        <span class="daily-kcal-num kcal-burn">-${plan.kcal_burn} kcal训练</span>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-header">
+        <span class="progress-label">训练进度</span>
+        <span class="progress-count">${checkedCount} / ${exercises.length}</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:${progressPct}%"></div>
+      </div>
+    </div>
+
+    <div class="completion-banner${allDone ? ' show' : ''}" id="completionBanner">
+      <div class="completion-emoji">🎉</div>
+      <div class="completion-title">今日训练完成！</div>
+      <div class="completion-sub">记得拉伸，吃好饭，好好睡觉</div>
+    </div>
+  `;
+
+  // BREAKFAST
+  html += buildMealSection('早餐', '🍳', 'food', plan.meals.breakfast, '早餐');
+
+  // WARMUP
+  html += `
+    <div class="section-card">
+      <div class="section-head" onclick="toggleSection(this)">
+        <div class="section-icon warmup">🔥</div>
+        <div class="section-title">热身</div>
+        <div class="section-meta">约5分钟</div>
+        <div class="section-chevron">▾</div>
+      </div>
+      <div class="section-body open">
+        ${plan.warmup.map(w => `
+          <div class="warmup-item">
+            <div class="warmup-dot"></div>
+            <div class="warmup-text">${w.text}</div>
+            <div class="warmup-time">${w.time}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // EXERCISES
+  html += `
+    <div class="section-card">
+      <div class="section-head" onclick="toggleSection(this)">
+        <div class="section-icon train">⚡</div>
+        <div class="section-title">正式训练</div>
+        <div class="section-meta">${exercises.length} 个动作</div>
+        <div class="section-chevron open">▾</div>
+      </div>
+      <div class="section-body open">
+        ${exercises.map(ex => buildExercise(ex)).join('')}
+      </div>
+    </div>
+  `;
+
+  // STRETCH
+  html += `
+    <div class="section-card">
+      <div class="section-head" onclick="toggleSection(this)">
+        <div class="section-icon stretch">🧘</div>
+        <div class="section-title">拉伸放松</div>
+        <div class="section-meta">约10分钟</div>
+        <div class="section-chevron">▾</div>
+      </div>
+      <div class="section-body">
+        ${plan.stretch.map(s => `
+          <div class="stretch-item">
+            <div class="stretch-dot"></div>
+            <div class="stretch-text">${s.text}</div>
+            <div class="stretch-time">${s.time}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  // SURVEY
+  html += buildSurvey(plan.survey);
+
+  // LUNCH
+  html += buildMealSection('午餐', '🥗', 'food', plan.meals.lunch, '午餐');
+
+  // DINNER
+  html += buildMealSection('晚餐', '🌙', 'food', plan.meals.dinner, '晚餐');
+
+  // EXPORT
+  html += `
+    <button class="export-btn" onclick="exportData()">
+      <span class="export-icon">📊</span>
+      导出训练记录
+    </button>
+    <div style="height:40px"></div>
+  `;
+
+  container.innerHTML = html;
+}
+
+function buildMealSection(label, icon, iconClass, meal, tag) {
+  return `
+    <div class="section-card">
+      <div class="section-head" onclick="toggleSection(this)">
+        <div class="section-icon ${iconClass}">${icon}</div>
+        <div class="section-title">${meal.name}</div>
+        <div class="section-meta">${meal.kcal} kcal</div>
+        <div class="section-chevron">▾</div>
+      </div>
+      <div class="section-body">
+        <div class="meal-item">
+          <div class="meal-desc">${meal.desc}</div>
+          <div class="meal-tags">
+            <span class="meal-tag kcal">🔥 ${meal.kcal} kcal</span>
+            <span class="meal-tag protein">💪 蛋白质 ${meal.protein}</span>
+            <span class="meal-tag price">💰 ${meal.price}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildExercise(ex) {
+  const checked = getExerciseChecked(currentWeek, currentDayIndex, ex.id);
+  return `
+    <div class="exercise-item" id="exitem-${ex.id}">
+      <div class="exercise-main">
+        <div class="exercise-checkbox${checked ? ' checked'  : ''}" id="cb-${ex.id}" onclick="toggleExercise('${ex.id}', event)">
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="exercise-info" onclick="toggleDetail('${ex.id}')">
+          <div class="exercise-name" style="${checked ? 'opacity:0.5;text-decoration:line-through;' : ''}">${ex.name}</div>
+          <div class="exercise-sets">
+            <span class="exercise-set-tag sets">${ex.sets} 组</span>
+            <span class="exercise-set-tag reps">${ex.reps}</span>
+            <span class="exercise-set-tag rest">休息 ${ex.rest}</span>
+            <span class="exercise-set-tag muscle">${ex.muscle}</span>
+          </div>
+          <div class="exercise-expand-btn">展开详情 ▾</div>
+        </div>
+      </div>
+      <div class="exercise-detail" id="detail-${ex.id}">
+        <div class="detail-block">
+          <div class="detail-label feel">感受哪里发力</div>
+          <div class="detail-text">${ex.feel}</div>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label how">正确动作要点</div>
+          <ul class="detail-list">${ex.how.map(h => `<li>${h}</li>`).join('')}</ul>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label wrong">常见错误</div>
+          <ul class="detail-list">${ex.wrong.map(w => `<li>${w}</li>`).join('')}</ul>
+        </div>
+        <div class="detail-block">
+          <div class="detail-label weight">怎么选重量</div>
+          <div class="detail-text">${ex.weight}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildSurvey(survey) {
+  return `
+    <div class="section-card">
+      <div class="section-head" onclick="toggleSection(this)">
+        <div class="section-icon survey">📝</div>
+        <div class="section-title">训练反馈</div>
+        <div class="section-meta">帮助调整计划</div>
+        <div class="section-chevron">▾</div>
+      </div>
+      <div class="section-body">
+        ${survey.map(q => `
+          <div class="survey-item">
+            <div class="survey-q">${q.q}</div>
+            ${q.opts.length > 0 ? `
+              <div class="survey-options">
+                ${q.opts.map((opt, i) => {
+                  const saved = getSurveyAnswer(currentWeek, currentDayIndex, q.id);
+                  return `<button class="survey-opt${saved === opt ? ' selected' : ''}" onclick="selectSurvey('${q.id}', '${opt}', this)">${opt}</button>`;
+                }).join('')}
+              </div>
+            ` : ''}
+            ${q.text !== undefined ? `
+              <textarea class="survey-text-input" placeholder="写下你的感受（可选）..." rows="2"
+                onchange="setSurveyText('${q.id}', this.value)">${getSurveyAnswer(currentWeek, currentDayIndex, q.id + '_text') || ''}</textarea>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function buildRestDay() {
+  const dayName = DAYS[currentDayIndex];
+  return `
+    <div class="rest-content">
+      <div class="rest-hero">
+        <div class="rest-emoji">🌿</div>
+        <div class="rest-title">周${dayName} · 休息日</div>
+        <div class="rest-desc">肌肉在休息中生长，今天是计划的一部分<br>不要焦虑，好好恢复</div>
+      </div>
+
+      <div class="rest-tips">
+        <div class="rest-tip-head">休息日建议</div>
+        ${REST_TIPS.map(t => `
+          <div class="rest-tip-item">
+            <div class="rest-tip-icon">${t.icon}</div>
+            <div class="rest-tip-text">${t.text}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="rest-tips">
+        <div class="rest-tip-head">休息日饮食参考</div>
+        <div class="rest-tip-item">
+          <div class="rest-tip-icon">🍳</div>
+          <div class="rest-tip-text"><strong style="color:var(--text)">早餐（~420kcal）</strong>：燕麦 + 鸡蛋2个 + 无糖豆浆，约12–14元</div>
+        </div>
+        <div class="rest-tip-item">
+          <div class="rest-tip-icon">🥗</div>
+          <div class="rest-tip-text"><strong style="color:var(--text)">午餐（~550kcal）</strong>：鸡胸肉蔬菜饭（减少碳水量），约13–15元</div>
+        </div>
+        <div class="rest-tip-item">
+          <div class="rest-tip-icon">🌙</div>
+          <div class="rest-tip-text"><strong style="color:var(--text)">晚餐（~400kcal）</strong>：蔬菜沙拉 + 蛋白质（鸡蛋/豆腐），约10–13元</div>
+        </div>
+        <div class="rest-tip-item">
+          <div class="rest-tip-icon">📊</div>
+          <div class="rest-tip-text"><strong style="color:var(--yellow)">休息日总摄入目标：约1370–1500 kcal</strong>，蛋白质不低于80g</div>
+        </div>
+      </div>
+
+      <button class="export-btn" onclick="exportData()">
+        <span class="export-icon">📊</span>
+        导出训练记录
+      </button>
+      <div style="height:40px"></div>
+    </div>
+  `;
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+
+function toggleSection(head) {
+  const body = head.nextElementSibling;
+  const chevron = head.querySelector('.section-chevron');
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function toggleDetail(exId) {
+  const detail = document.getElementById('detail-' + exId);
+  detail.classList.toggle('open');
+}
+
+function toggleExercise(exId, event) {
+  event.stopPropagation();
+  const current = getExerciseChecked(currentWeek, currentDayIndex, exId);
+  setExerciseChecked(currentWeek, currentDayIndex, exId, !current);
+  buildContent();
+  buildTabs();
+}
+
+function selectSurvey(qId, val, btn) {
+  setSurveyAnswer(currentWeek, currentDayIndex, qId, val);
+  const parent = btn.closest('.survey-options');
+  parent.querySelectorAll('.survey-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function setSurveyText(qId, val) {
+  setSurveyAnswer(currentWeek, currentDayIndex, qId + '_text', val);
+}
+
+function changeWeek(w) {
+  currentWeek = parseInt(w);
+  buildTabs();
+  buildContent();
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+
+function exportData() {
+  const allData = {};
+  for (let w = 1; w <= 4; w++) {
+    allData['week' + w] = {};
+    for (let d = 0; d <= 6; d++) {
+      const s = loadState(w, d);
+      if (Object.keys(s).length > 0) {
+        allData['week' + w]['day' + d] = s;
+      }
+    }
+  }
+
+  // 生成可读报告
+  let report = '=== BODY01 训练数据导出 ===\n';
+  report += `导出时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+
+  for (let w = 1; w <= 4; w++) {
+    const wData = allData['week' + w];
+    const hasData = Object.keys(wData).some(d => Object.keys(wData[d]).length > 0);
+    if (!hasData) continue;
+
+    report += `── 第 ${w} 周 ──\n`;
+    const dayMap = {1:'周一(推)', 2:'周二(拉)', 3:'周三(腿/核心)', 4:'周四(全身/有氧)'};
+
+    for (let d = 1; d <= 4; d++) {
+      const dData = wData['day' + d];
+      if (!dData || Object.keys(dData).length === 0) continue;
+      report += `\n${dayMap[d]}:\n`;
+
+      const plan = PLAN[d];
+      if (plan && plan.exercises) {
+        plan.exercises.forEach(ex => {
+          const done = dData['ex_' + ex.id];
+          report += `  [${done ? '✓' : '○'}] ${ex.name}\n`;
+        });
+      }
+
+      if (plan && plan.survey) {
+        report += '  反馈问卷:\n';
+        plan.survey.forEach(q => {
+          const ans = dData['sq_' + q.id];
+          if (ans) report += `    ${q.q} → ${ans}\n`;
+          const textAns = dData['sq_' + q.id + '_text'];
+          if (textAns) report += `    备注：${textAns}\n`;
+        });
+      }
+    }
+    report += '\n';
+  }
+
+  // 统计
+  let totalDone = 0, totalEx = 0;
+  for (let w = 1; w <= 4; w++) {
+    for (let d = 1; d <= 4; d++) {
+      const plan = PLAN[d];
+      if (!plan || !plan.exercises) continue;
+      plan.exercises.forEach(ex => {
+        totalEx++;
+        if (loadState(w, d)['ex_' + ex.id]) totalDone++;
+      });
+    }
+  }
+  report += `── 整体统计 ──\n完成率：${totalDone}/${totalEx} (${totalEx > 0 ? Math.round(totalDone/totalEx*100) : 0}%)\n`;
+
+  // 下载
+  const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `训练记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g,'-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+function init() {
+  const today = new Date().getDay();
+  // Default to today if it's a training day, else Mon
+  const trainingDays = [1,2,3,4];
+  if (trainingDays.includes(today)) {
+    currentDayIndex = today;
+  } else {
+    currentDayIndex = today; // show whatever day it is (rest day)
+  }
+
+  // Set week selector
+  document.getElementById('weekSelect').value = currentWeek;
+
+  buildTabs();
+  buildContent();
+
+  // Scroll today tab into view
+  setTimeout(() => {
+    const tabs = document.querySelectorAll('.day-tab');
+    tabs.forEach(t => {
+      if (t.classList.contains('active')) {
+        t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    });
+  }, 100);
+}
+
+init();
+</script>
+</body>
+</html>
